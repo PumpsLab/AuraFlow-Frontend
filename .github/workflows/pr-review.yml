@@ -1,0 +1,145 @@
+name: PR Review
+
+on:
+  pull_request:
+    branches: [main, master, develop]
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main, master, develop]
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  lint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run lint -- --max-warnings=0
+        continue-on-error: true
+      - name: Annotate ESLint results
+        uses: reviewdog/action-eslint@v1
+        if: always()
+        continue-on-error: true
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          eslint_flags: '--max-warnings=0'
+
+  typecheck:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npx tsc --noEmit
+
+  build:
+    name: Next.js Build
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+      NEXT_PUBLIC_STELLAR_NETWORK: testnet
+      NEXT_PUBLIC_STELLAR_RPC_URL: https://soroban-testnet.stellar.org
+      NEXT_PUBLIC_CONFIDENTIAL_TOKEN_CONTRACT: CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA
+      NEXT_PUBLIC_PAYROLL_CONTRACT: CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA
+      NEXT_PUBLIC_USDC_CONTRACT: CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - name: Check for build artifacts
+        run: test -d .next
+
+  audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm audit --audit-level=high
+        continue-on-error: true
+      - run: npx --yes knip --reporter json 2>/dev/null || echo "knip not configured"
+        continue-on-error: true
+
+  stale-check:
+    name: Stale References
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for stale Ethereum/Arbitrum references
+        run: |
+          echo "Checking for stale references that should be Stellar..."
+          if grep -R --include="*.ts" --include="*.tsx" -n "Arbitrum\|MetaMask\|wagmi\|rainbowkit\|viem\|SEPOLIA\|0x\${string}\|arbiscan" --exclude-dir=node_modules --exclude-dir=.next .; then
+            echo "::error:: Found stale Ethereum/Arbitrum references"
+            exit 1
+          fi
+          echo "No stale refs found"
+      - name: Check hardcoded Future Network
+        run: |
+          if grep -R --include="*.ts" --include="*.tsx" -n "Future Network" --exclude-dir=node_modules --exclude-dir=.next lib/ hooks/ components/ 2>/dev/null; then
+            echo "::warning:: Found hardcoded Future Network - should use Networks.TESTNET via contract-config"
+          fi
+
+  wallet-smoke:
+    name: Wallet Integration Smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Verify Freighter API types
+        run: node -e "require('@stellar/freighter-api'); console.log('freighter-api ok')"
+      - name: Verify Stellar SDK
+        run: node -e "const s=require('@stellar/stellar-sdk'); console.log(s.Networks.TESTNET); new s.rpc.Server('https://soroban-testnet.stellar.org'); console.log('sdk ok')"
+      - name: Verify contract-config exports NetworkPassphrase
+        run: node -e "require('tsx') || true" 2>/dev/null; grep -q "STELLAR_NETWORK_PASSPHRASE" lib/wallet/contract-config.ts && echo "contract-config ok"
+
+  summary:
+    name: PR Summary
+    if: always() && github.event_name == 'pull_request'
+    needs: [lint, typecheck, build, audit, stale-check, wallet-smoke]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: pr-review
+          message: |
+            ### PR Review Summary
+            | Check | Status |
+            |---|---|
+            | ESLint | ${{ needs.lint.result }} |
+            | TypeScript | ${{ needs.typecheck.result }} |
+            | Build | ${{ needs.build.result }} |
+            | Audit | ${{ needs.audit.result }} |
+            | Stale Refs | ${{ needs.stale-check.result }} |
+            | Wallet Smoke | ${{ needs.wallet-smoke.result }} |
+
+            > Auto-generated by `.github/workflows/pr-review.yml`

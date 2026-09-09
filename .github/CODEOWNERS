@@ -1,0 +1,5 @@
+# Default reviewers for PRs touching wallet / contracts
+*                   @frontend-leads
+/lib/wallet/        @stellar-reviewers @frontend-leads
+/lib/private-payroll-api.ts @stellar-reviewers @frontend-leads
+/hooks/useWallet.tsx @stellar-reviewers @frontend-leads

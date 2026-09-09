@@ -1,0 +1,125 @@
+"use client"
+
+import { useMemo } from "react";
+import { Area, AreaChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, ReferenceLine } from "recharts"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./card"
+
+interface RunwayChartProps {
+  vaultBalance: number;
+  monthlyBurnRate: number;
+}
+
+const AURAFLOW_GREEN = "#D9FF00"
+const AURAFLOW_DARK = "#1A1D1A"
+const AURAFLOW_RED = "#FF3B30"
+
+const MONTH_LABELS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+function generateProjection(currentBalance: number, burnRate: number) {
+  const data: Array<{ month: string; balance: number; isCritical: boolean }> = [];
+  const now = new Date();
+
+  let balance = currentBalance;
+  for (let i = 0; i < 7; i++) { // Current month + next 6
+    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    data.push({
+      month: MONTH_LABELS[d.getMonth()],
+      balance: Math.max(0, balance),
+      isCritical: burnRate > 0 && balance < (burnRate * 1.5) // Less than 1.5 months runway
+    });
+    balance -= burnRate;
+  }
+  return data;
+}
+
+function formatAxisValue(value: number, maxValue: number) {
+  if (maxValue < 1000) {
+    return `$${Math.round(value)}`
+  }
+
+  return `$${(value / 1000).toFixed(0)}k`
+}
+
+function CustomTooltip({
+  active,
+  payload,
+  label,
+}: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
+  if (active && payload && payload.length) {
+    const val = payload[0].value;
+    return (
+      <div className="bg-[#0a0a0a] border border-white/10 rounded-xl px-3 py-2 shadow-sm">
+        <p className="text-xs text-[#a8a8aa]/60">End of {label}</p>
+        <p className="text-sm font-bold" style={{ color: val === 0 ? AURAFLOW_RED : AURAFLOW_GREEN }}>
+          ${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+        </p>
+      </div>
+    )
+  }
+  return null
+}
+
+export function RunwayProjectionChart({ vaultBalance, monthlyBurnRate }: RunwayChartProps) {
+  const data = useMemo(() => generateProjection(vaultBalance, monthlyBurnRate), [vaultBalance, monthlyBurnRate]);
+  const maxChartValue = useMemo(
+    () => Math.max(vaultBalance, monthlyBurnRate * 1.5, ...data.map((point) => point.balance)),
+    [data, monthlyBurnRate, vaultBalance],
+  );
+
+  return (
+    <Card className="relative">
+      <CardHeader>
+        <CardTitle>Treasury Runway Projection</CardTitle>
+        <CardDescription>Estimated vault depletion based on stream burn and private payouts</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="h-[280px] w-full min-w-0 transition-opacity duration-300">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={280}>
+            <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="runwayGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={AURAFLOW_GREEN} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={AURAFLOW_GREEN} stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="criticalGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={AURAFLOW_RED} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={AURAFLOW_RED} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
+              <XAxis
+                dataKey="month"
+                stroke="#a8a8aa"
+                fontSize={12}
+                tickLine={false}
+                axisLine={false}
+                opacity={0.6}
+                dy={10}
+              />
+              <YAxis
+                stroke="#a8a8aa"
+                fontSize={12}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(value) => formatAxisValue(value, maxChartValue)}
+                opacity={0.6}
+                dx={-10}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Area
+                type="monotone"
+                dataKey="balance"
+                stroke={data[data.length - 1].balance === 0 ? AURAFLOW_RED : AURAFLOW_GREEN}
+                strokeWidth={3}
+                fill={data[data.length - 1].balance === 0 ? "url(#criticalGradient)" : "url(#runwayGradient)"}
+              />
+              {monthlyBurnRate > 0 ? (
+                <ReferenceLine y={monthlyBurnRate * 1.5} stroke={AURAFLOW_RED} strokeDasharray="3 3" opacity={0.5} />
+              ) : null}
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}

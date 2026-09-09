@@ -1,0 +1,25 @@
+name: Bug Report
+description: File a bug for the Stellar frontend
+labels: [bug, frontend]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      placeholder: Freighter connect failed with ...
+    validations: { required: true }
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduce
+      placeholder: 1. npm run dev 2. Click Connect...
+  - type: input
+    id: network
+    attributes:
+      label: Network
+      placeholder: testnet / mainnet / futurenet
+  - type: input
+    id: freighter
+    attributes:
+      label: Freighter version
+      placeholder: 6.0.1
