@@ -1,5 +1,3 @@
-
-
 coverage
 .turbo
 target/
@@ -69,3 +67,4 @@ bundle-size-summary.json
 # npm audit artifacts
 npm-audit-report.json
 npm-audit-temp.json
+.vercel
