@@ -119,7 +119,7 @@ jobs:
       - name: Verify Stellar SDK
         run: node -e "const s=require('@stellar/stellar-sdk'); console.log(s.Networks.TESTNET); new s.rpc.Server('https://soroban-testnet.stellar.org'); console.log('sdk ok')"
       - name: Verify contract-config exports NetworkPassphrase
-        run: node -e "require('tsx') || true" 2>/dev/null; grep -q "STELLAR_NETWORK_PASSPHRASE" lib/wallet/contract-config.ts && echo "contract-config ok"
+        run: grep -q "export const STELLAR_NETWORK_PASSPHRASE" lib/wallet/contract-config.ts && echo "contract-config ok"
 
   summary:
     name: PR Summary
