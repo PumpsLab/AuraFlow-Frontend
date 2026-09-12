@@ -41,9 +41,9 @@ npx tsc --noEmit # typecheck
 
 Install the browser extension for Stellar Testnet:
 
-* Chrome: https://chromewebstore.google.com/detail/freighter/bcacfldlkkdogcmkkibnjlakofdplcbk
-* Firefox: https://addons.mozilla.org/en-US/firefox/addon/freighter/
-* Fund testnet XLM: https://faucet.stellar.org (or Friendbot via Freighter)
+* Chrome: <https://chromewebstore.google.com/detail/freighter/bcacfldlkkdogcmkkibnjlakofdplcbk>
+* Firefox: <https://addons.mozilla.org/en-US/firefox/addon/freighter/>
+* Fund testnet XLM: <https://faucet.stellar.org> (or Friendbot via Freighter)
 
 > AuraFlow is deployed on **Stellar Testnet**. Ensure Freighter is switched to **TESTNET** — the app shows `Stellar Testnet Network Online` when connected (`components/ui/network-switch-guide.tsx:20`).
 
@@ -57,9 +57,9 @@ NEXT_PUBLIC_STELLAR_NETWORK=testnet     # testnet | mainnet
 NEXT_PUBLIC_STELLAR_RPC_URL=https://soroban-testnet.stellar.org
 
 # Deployed Soroban contracts (leave empty until deployed — app falls back to "0")
-NEXT_PUBLIC_CONFIDENTIAL_TOKEN_CONTRACT=
-NEXT_PUBLIC_PAYROLL_CONTRACT=
-NEXT_PUBLIC_USDC_CONTRACT=CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA
+CONFIDENTIAL_TOKEN_CONTRACT=
+PAYROLL_CONTRACT=
+USDC_CONTRACT=CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA
 ```
 
 Derived (`lib/wallet/contract-config.ts:10`):
@@ -92,7 +92,7 @@ lib/api/              # REST clients (companies, payroll-runs, employees, claims
 ## Scripts
 
 | Script | What |
-|---|---|
+| --- | --- |
 | `dev` | `next dev` |
 | `build` | `next build` (requires STELLAR env in CI — see workflow) |
 | `start` | `next start` |
@@ -126,7 +126,7 @@ MIT — see `LICENSE`.
 
 ## Reference
 
-* Freighter API: https://docs.freighter.app
-* Stellar SDK: https://github.com/stellar/js-stellar-sdk
-* Soroban Docs: https://soroban.stellar.org/docs
-* Testnet: https://testnet.stellar.org, Faucet: https://faucet.stellar.org, Explorer: https://stellarchain.io
+* Freighter API: <https://docs.freighter.app>
+* Stellar SDK: <https://github.com/stellar/js-stellar-sdk>
+* Soroban Docs: <https://soroban.stellar.org/docs>
+* Testnet: <https://testnet.stellar.org>, Faucet: <https://faucet.stellar.org>, Explorer: <https://stellarchain.io>

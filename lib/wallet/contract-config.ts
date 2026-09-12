@@ -11,21 +11,21 @@ export const STELLAR_NETWORK_PASSPHRASE =
   STELLAR_NETWORK === "mainnet" ? Networks.PUBLIC : Networks.TESTNET;
 
 export const CONFIDENTIAL_TOKEN_CONTRACT =
-  process.env.NEXT_PUBLIC_CONFIDENTIAL_TOKEN_CONTRACT ||
+  process.env.CONFIDENTIAL_TOKEN_CONTRACT ||
   (STELLAR_NETWORK === "mainnet"
     ? ""
     : "CCC2YY37SVM4BQFFXFR65N4TBQUQZGGETLQGWTFFDX5QQ5RSWRTV63ZY");
 
 export const PAYROLL_CONTRACT =
-  process.env.NEXT_PUBLIC_PAYROLL_CONTRACT ||
+  process.env.PAYROLL_CONTRACT ||
   (STELLAR_NETWORK === "mainnet"
     ? ""
     : "CBHGFLE4GB2LDLPCUTMZMZQ65G355DQ7X4FEK2GTT74B5L55IAVYBT7Q");
 
 export const USDC_CONTRACT =
-  process.env.NEXT_PUBLIC_USDC_CONTRACT ||
+  process.env.USDC_CONTRACT ||
   (STELLAR_NETWORK === "mainnet"
-    ? "" // set NEXT_PUBLIC_USDC_CONTRACT for mainnet SAC (e.g. GA5Z... issuer contract)
+    ? "" // set USDC_CONTRACT for mainnet SAC (e.g. GA5Z... issuer contract)
     : "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA");
 
 export const USDC_ISSUER =
