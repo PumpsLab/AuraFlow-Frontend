@@ -32,26 +32,27 @@ export function listRuns(employerWallet: string, sessionToken: string) {
   return apiGet(`/payroll-runs/runs?employerWallet=${employerWallet}`, { "x-auraflow-session": sessionToken });
 }
 
-export function getRun(runId: string, employerWallet: string, sessionToken: string) {
-  return apiGet(`/payroll-runs/runs/${runId}?employerWallet=${employerWallet}`, { "x-auraflow-session": sessionToken });
-}
-
-export function finalizeRun(runId: string, data: any, sessionToken: string) {
-  return apiPost(`/payroll-runs/runs/${runId}/finalize`, data, { "x-auraflow-session": sessionToken });
-}
-
-export function retryFailedRunItems(runId: string, data: any, sessionToken: string) {
-  return apiPost(`/payroll-runs/runs/${runId}/retry-failed`, data, { "x-auraflow-session": sessionToken });
-}
-
-export function markRunItemProcessing(runId: string, itemId: string, data: any, sessionToken: string) {
-  return apiPost(`/payroll-runs/runs/${runId}/items/${itemId}/processing`, data, { "x-auraflow-session": sessionToken });
-}
-
-export function resolveRunItem(runId: string, itemId: string, data: any, sessionToken: string) {
-  return apiPost(`/payroll-runs/runs/${runId}/items/${itemId}/resolve`, data, { "x-auraflow-session": sessionToken });
-}
-
-export function listStatements(employerWallet: string, sessionToken: string, scope?: string) {
-  return apiGet(`/payroll-runs/statements?employerWallet=${employerWallet}&scope=${scope || "employer"}`, { "x-auraflow-session": sessionToken });
-}
+// TODO: Implement these backend endpoints
+// export function getRun(runId: string, employerWallet: string, sessionToken: string) {
+//   return apiGet(`/payroll-runs/runs/${runId}?employerWallet=${employerWallet}`, { "x-auraflow-session": sessionToken });
+// }
+//
+// export function finalizeRun(runId: string, data: any, sessionToken: string) {
+//   return apiPost(`/payroll-runs/runs/${runId}/finalize`, data, { "x-auraflow-session": sessionToken });
+// }
+//
+// export function retryFailedRunItems(runId: string, data: any, sessionToken: string) {
+//   return apiPost(`/payroll-runs/runs/${runId}/retry-failed`, data, { "x-auraflow-session": sessionToken });
+// }
+//
+// export function markRunItemProcessing(runId: string, itemId: string, data: any, sessionToken: string) {
+//   return apiPost(`/payroll-runs/runs/${runId}/items/${itemId}/processing`, data, { "x-auraflow-session": sessionToken });
+// }
+//
+// export function resolveRunItem(runId: string, itemId: string, data: any, sessionToken: string) {
+//   return apiPost(`/payroll-runs/runs/${runId}/items/${itemId}/resolve`, data, { "x-auraflow-session": sessionToken });
+// }
+//
+// export function listStatements(employerWallet: string, sessionToken: string, scope?: string) {
+//   return apiGet(`/payroll-runs/statements?employerWallet=${employerWallet}&scope=${scope || "employer"}`, { "x-auraflow-session": sessionToken });
+// }
